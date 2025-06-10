@@ -1,5 +1,5 @@
 import os
-from .models import create_app, db
+from . import create_app, db
 from .models import User
 from werkzeug.security import generate_password_hash
 

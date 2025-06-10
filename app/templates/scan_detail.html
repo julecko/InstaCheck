@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Scan Details{% endblock %}
+{% block content %}
+    <div class="py-6">
+        <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Scan Details for {{ bot.username }} on {{ scan.scan_time.strftime('%Y-%m-%d %H:%M:%S') }}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="card p-6">
+                <h3 class="text-2xl font-semibold text-red-600 mb-4">Users Who Left</h3>
+                {% if left %}
+                    <ul class="space-y-2">
+                        {% for user in left %}
+                            <li class="text-gray-700 p-2 bg-red-50 rounded-lg">{{ user }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-gray-600">No users have unfollowed in this scan.</p>
+                {% endif %}
+            </div>
+            <div class="card p-6">
+                <h3 class="text-2xl font-semibold text-green-600 mb-4">Users Who Stayed</h3>
+                {% if stayed %}
+                    <ul class="space-y-2">
+                        {% for user in stayed %}
+                            <li class="text-gray-700 p-2 bg-green-50 rounded-lg">{{ user }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-gray-600">No followers recorded in this scan.</p>
+                {% endif %}
+            </div>
+            <div class="card p-6">
+                <h3 class="text-2xl font-semibold text-blue-600 mb-4">New Followers</h3>
+                {% if new_followers %}
+                    <ul class="space-y-2">
+                        {% for user in new_followers %}
+                            <li class="text-gray-700 p-2 bg-blue-50 rounded-lg">{{ user }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-gray-600">No new followers in this scan.</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card p-6 mb-6">
+            <h3 class="text-2xl font-semibold text-gray-800 mb-4">Debug Information</h3>
+            {% if debug_info %}
+                <ul class="space-y-2">
+                    {% for info in debug_info %}
+                        <li class="text-gray-700 p-2 bg-gray-50 rounded-lg">{{ info }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-gray-600">No debug information available.</p>
+            {% endif %}
+        </div>
+        <div class="text-center mt-6">
+            <a href="{{ url_for('scan_history', bot_id=bot.id) }}" class="btn bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700">Back to Scan History</a>
+        </div>
+    </div>
+{% endblock %}

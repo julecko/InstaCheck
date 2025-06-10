@@ -9,27 +9,21 @@
                     <thead>
                         <tr class="bg-gray-100">
                             <th class="p-3 text-gray-700 font-semibold">Scan Time</th>
-                            <th class="p-3 text-gray-700 font-semibold">Followers Before</th>
-                            <th class="p-3 text-gray-700 font-semibold">Followers After</th>
                             <th class="p-3 text-gray-700 font-semibold">Left</th>
                             <th class="p-3 text-gray-700 font-semibold">Stayed</th>
-                            <th class="p-3 text-gray-700 font-semibold">Debug Info</th>
+                            <th class="p-3 text-gray-700 font-semibold">New Followers</th>
+                            <th class="p-3 text-gray-700 font-semibold">Details</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for scan in scans %}
                             <tr class="border-b border-gray-200">
                                 <td class="p-3 text-gray-600">{{ scan.scan_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                                <td class="p-3 text-gray-600">{{ scan.followers_before | length }}</td>
-                                <td class="p-3 text-gray-600">{{ scan.followers_after | length }}</td>
                                 <td class="p-3 text-red-600">{{ scan.left | length }}</td>
                                 <td class="p-3 text-green-600">{{ scan.stayed | length }}</td>
-                                <td class="p-3 text-gray-600">
-                                    {% if scan.debug_info %}
-                                        <pre class="bg-gray-50 p-2 rounded text-sm">{{ scan.debug_info }}</pre>
-                                    {% else %}
-                                        <span>No issues</span>
-                                    {% endif %}
+                                <td class="p-3 text-blue-600">{{ scan.new_followers | length }}</td>
+                                <td class="p-3">
+                                    <a href="{{ url_for('scan_detail', scan_id=scan.id) }}" class="btn bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700">View Details</a>
                                 </td>
                             </tr>
                         {% endfor %}

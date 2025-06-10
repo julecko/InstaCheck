@@ -32,3 +32,4 @@ class Scan(db.Model):
     scan_time = db.Column(db.DateTime, default=datetime.utcnow)
     followers_before = db.Column(db.Text)
     followers_after = db.Column(db.Text)
+    debug_info = db.Column(db.Text, nullable=True)
