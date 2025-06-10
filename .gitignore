@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+.env
+*.sqlite3
+
+# Virtual environments
+venv/
+env/
+
+# Flask cache
+instance/
+.webassets-cache
+
+# Migrations
+migrations/
+
+# VSCode settings
+.vscode/
+
+# Byte-compiled files
+*.pyc
+
+# MacOS
+.DS_Store
+
+# Logs
+*.log
+
+# Docker volumes (optional if you use named volumes)
+db_data/
+
+# Ignore compiled libraries
+*.so
+
+# System files
+Thumbs.db
