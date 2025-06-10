@@ -18,6 +18,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import json
 from instagrapi import Client
 from datetime import datetime
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -71,42 +75,125 @@ def add_bot():
     flash("Instagram bot added!")
     return redirect(url_for("dashboard"))
 
-@app.route("/scan/<int:bot_id>")
-@login_required
-def scan(bot_id):
-    bot = InstaBot.query.filter_by(id=bot_id, user_id=current_user.id).first_or_404()
-    client = Client()
-    try:
-        client.login(bot.username, bot.password)
-    except Exception as e:
-        flash(f"Failed to login Instagram bot: {e}")
-        return redirect(url_for("dashboard"))
-
-    followers_after = client.user_followers(client.user_id_from_username(current_user.insta_username))
-    follower_usernames_after = list(followers_after.keys())
-
-    last_scan = Scan.query.filter_by(bot_id=bot.id, user_id=current_user.id).order_by(Scan.scan_time.desc()).first()
-    followers_before = []
-    if last_scan:
-        followers_before = json.loads(last_scan.followers_after)
-
-    scan_record = Scan(
-        user_id=current_user.id,
-        bot_id=bot.id,
-        scan_time=datetime.utcnow(),
-        followers_before=json.dumps(followers_before),
-        followers_after=json.dumps(follower_usernames_after),
-    )
-    db.session.add(scan_record)
-    db.session.commit()
-
-    left = list(set(followers_before) - set(follower_usernames_after))
-    stayed = list(set(follower_usernames_after) & set(followers_before))
-
-    return render_template("scans.html", left=left, stayed=stayed, bot=bot)
-
 @app.route("/scans")
 @login_required
 def scans():
     user_scans = Scan.query.filter_by(user_id=current_user.id).order_by(Scan.scan_time.desc()).all()
     return render_template("scans.html", scans=user_scans)
+
+@app.route("/edit_profile", methods=["GET", "POST"])
+@login_required
+def edit_profile():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "").strip()
+        insta_username = request.form.get("insta_username", "").strip()
+        
+        # Track if any changes were made
+        changes_made = False
+        
+        # Update username if provided and different
+        if username and username != current_user.username:
+            existing_user = User.query.filter(User.username == username, User.id != current_user.id).first()
+            if existing_user:
+                flash("Username already taken", "error")
+                return redirect(url_for("edit_profile"))
+            current_user.username = username
+            changes_made = True
+        
+        # Update password if provided
+        if password:
+            current_user.password = generate_password_hash(password, method="pbkdf2:sha256")
+            changes_made = True
+        
+        # Update insta_username if provided and different
+        if insta_username and insta_username != current_user.insta_username:
+            current_user.insta_username = insta_username
+            changes_made = True
+        
+        # If no changes were made, inform the user
+        if not changes_made:
+            flash("No changes provided", "info")
+            return redirect(url_for("edit_profile"))
+        
+        # Save changes to the database
+        try:
+            db.session.commit()
+            flash("Profile updated successfully!", "success")
+            return redirect(url_for("dashboard"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error updating profile: {e}", "error")
+            return redirect(url_for("edit_profile"))
+    
+    return render_template("edit_profile.html", user=current_user)
+
+@app.route("/scan/<int:bot_id>")
+@login_required
+def scan(bot_id):
+    bot = InstaBot.query.filter_by(id=bot_id, user_id=current_user.id).first_or_404()
+    client = Client()
+    debug_info = []
+    
+    try:
+        client.login(bot.username, bot.password)
+        debug_info.append("Login successful")
+    except Exception as e:
+        debug_info.append(f"Login failed: {str(e)}")
+        logger.error("Login failed for bot %s: %s", bot.username, str(e))
+        flash(f"Failed to login Instagram bot: {e}", "error")
+        return redirect(url_for("dashboard"))
+
+    try:
+        # Get followers now
+        followers_after = client.user_followers(client.user_id_from_username(current_user.insta_username))
+        follower_usernames_after = list(followers_after.keys())
+        debug_info.append(f"Retrieved {len(follower_usernames_after)} followers")
+    except Exception as e:
+        debug_info.append(f"Failed to retrieve followers: {str(e)}")
+        logger.error("Failed to retrieve followers for %s: %s", current_user.insta_username, str(e))
+        flash(f"Failed to scan followers: {e}", "error")
+        return redirect(url_for("dashboard"))
+
+    # Get last scan for this bot/user
+    last_scan = Scan.query.filter_by(bot_id=bot.id, user_id=current_user.id).order_by(Scan.scan_time.desc()).first()
+    followers_before = []
+    if last_scan:
+        followers_before = json.loads(last_scan.followers_after)  # followers_after from last scan is before this scan
+        debug_info.append("Loaded previous scan data")
+
+    # Calculate differences
+    left = list(set(followers_before) - set(follower_usernames_after))
+    stayed = list(set(follower_usernames_after) & set(followers_before))
+    new_followers = list(set(follower_usernames_after) - set(followers_before))
+    debug_info.append(f"Calculated: {len(left)} users left, {len(stayed)} users stayed, {len(new_followers)} new followers")
+
+    # Create scan record
+    scan_record = Scan(
+        user_id=current_user.id,
+        bot_id=bot.id,
+        scan_time=datetime.utcnow(),
+        followers_before=json.dumps(followers_before),
+        followers_after=json.dumps(follower_usernames_after)
+    )
+    try:
+        db.session.add(scan_record)
+        db.session.commit()
+        debug_info.append("Scan record saved successfully")
+    except Exception as e:
+        debug_info.append(f"Failed to save scan record: {str(e)}")
+        logger.error("Failed to save scan record for bot %s: %s", bot.id, str(e))
+        flash(f"Failed to save scan data: {e}", "error")
+        return redirect(url_for("dashboard"))
+
+    return render_template("scans.html", left=left, stayed=stayed, new_followers=new_followers, bot=bot, debug_info=debug_info)
+
+@app.route("/scan_history/<int:bot_id>")
+@login_required
+def scan_history(bot_id):
+    bot = InstaBot.query.filter_by(id=bot_id, user_id=current_user.id).first_or_404()
+    scans = Scan.query.filter_by(bot_id=bot.id, user_id=current_user.id).order_by(Scan.scan_time.desc()).all()
+    for scan in scans:
+        scan.left = list(set(json.loads(scan.followers_before)) - set(json.loads(scan.followers_after)))
+        scan.stayed = list(set(json.loads(scan.followers_after)) & set(json.loads(scan.followers_before)))
+    return render_template("scan_history.html", bot=bot, scans=scans)
