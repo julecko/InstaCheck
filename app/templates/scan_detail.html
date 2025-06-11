@@ -54,7 +54,7 @@
             {% endif %}
         </div>
         <div class="text-center mt-6">
-            <a href="{{ url_for('scan_history', bot_id=bot.id) }}" class="btn bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700">Back to Scan History</a>
+            <a href="{{ url_for('scans.scan_history', bot_id=bot.id) }}" class="btn bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700">Back to Scan History</a>
         </div>
     </div>
 {% endblock %}

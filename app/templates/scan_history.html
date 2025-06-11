@@ -23,7 +23,7 @@
                                 <td class="p-3 text-green-600">{{ scan.stayed | length }}</td>
                                 <td class="p-3 text-blue-600">{{ scan.new_followers | length }}</td>
                                 <td class="p-3">
-                                    <a href="{{ url_for('scan_detail', scan_id=scan.id) }}" class="btn bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700">View Details</a>
+                                    <a href="{{ url_for('scans.scan_detail', scan_id=scan.id) }}" class="btn bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700">View Details</a>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -36,7 +36,7 @@
             </div>
         {% endif %}
         <div class="text-center mt-6">
-            <a href="{{ url_for('dashboard') }}" class="btn bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700">Back to Dashboard</a>
+            <a href="{{ url_for('dashboard.dashboard') }}" class="btn bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700">Back to Dashboard</a>
         </div>
     </div>
 {% endblock %}

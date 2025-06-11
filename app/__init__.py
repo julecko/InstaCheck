@@ -1,11 +1,16 @@
-import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from flask_login import LoginManager
+import logging
+import os
 from dotenv import load_dotenv
 
 db = SQLAlchemy()
+migrate = Migrate()
 login_manager = LoginManager()
+
+logging.basicConfig(level=logging.ERROR)
 
 def create_app():
     app = Flask(__name__)
@@ -20,11 +25,15 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
+    migrate.init_app(app, db)
     login_manager.init_app(app)
-    login_manager.login_view = "login"
+    login_manager.login_view = 'auth.login'
 
-    with app.app_context():
-        from . import routes, models
-        db.create_all()
+    from .routes.auth import auth_bp
+    from .routes.dashboard import dashboard_bp
+    from .routes.scans import scans_bp
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(dashboard_bp)
+    app.register_blueprint(scans_bp)
 
     return app
