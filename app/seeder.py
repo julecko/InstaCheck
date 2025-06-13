@@ -1,20 +1,24 @@
 import os
 from . import create_app, db
 from .models import User
+from getpass import getpass
 from werkzeug.security import generate_password_hash
 
 app = create_app()
 
 with app.app_context():
-    if not User.query.filter_by(username="admin").first():
+    username = input("Enter admin username: ")
+    password = getpass("Enter admin password: ")
+
+    if not User.query.filter_by(username=username).first():
         admin = User(
-            username="admin",
-            password=generate_password_hash("admin"),
+            username=username,
+            password=generate_password_hash(password),
             is_admin=True,
-            insta_username="admin"
+            insta_username=username
         )
         db.session.add(admin)
         db.session.commit()
-        print("Admin user created with username 'admin' and password 'admin'.")
+        print(f"Admin user created with username '{username}'.")
     else:
-        print("Admin user already exists.")
+        print(f"User '{username}' already exists.")
