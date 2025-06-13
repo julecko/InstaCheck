@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 from ..models import User, InstaBot
 from .. import db
 
@@ -15,8 +15,8 @@ def dashboard():
 @dashboard_bp.route("/add_bot", methods=["POST"])
 @login_required
 def add_bot():
-    username = request.form["username"]
-    password = request.form["password"]
+    username = request.form.get("username")
+    password = request.form.get("password")
     if not username or not password:
         flash("Username and password required", "error")
         return redirect(url_for("dashboard.dashboard"))

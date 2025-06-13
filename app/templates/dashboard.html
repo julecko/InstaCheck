@@ -20,10 +20,32 @@
             </form>
         </div>
         <div class="card p-6 mb-8">
+            <h3 class="text-2xl font-semibold text-gray-800 mb-4">Initiate Scan</h3>
+            {% if bots %}
+                <form method="POST" action="{{ url_for('scans.scan') }}">
+                    <div class="mb-4">
+                        <label for="bot_id" class="block text-gray-700 font-medium mb-2">Select Bot</label>
+                        <select id="bot_id" name="bot_id" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                            {% for bot in bots %}
+                                <option value="{{ bot.id }}">{{ bot.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn bg-green-600 text-white p-3 rounded-lg font-semibold hover:bg-green-700">Start Scan</button>
+                </form>
+            {% else %}
+                <p class="text-gray-600">No bots added yet. Add one above to start scanning.</p>
+            {% endif %}
+        </div>
+        <div class="card p-6 mb-8">
             <h3 class="text-2xl font-semibold text-gray-800 mb-4">Your Profile</h3>
             <p class="text-gray-600 mb-4">Username: {{ current_user.username }}</p>
             <p class="text-gray-600 mb-4">Instagram Username: {{ current_user.insta_username }}</p>
             <a href="{{ url_for('dashboard.edit_profile') }}" class="btn bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700">Edit Profile</a>
+        </div>
+        <div class="card p-6 mb-8">
+            <h3 class="text-2xl font-semibold text-gray-800 mb-4">Scan History</h3>
+            <a href="{{ url_for('scans.scan_history') }}" class="btn bg-blue-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600">View Scan History</a>
         </div>
         <h3 class="text-2xl font-semibold text-gray-800 mb-4">Your Bots</h3>
         {% if bots %}
@@ -31,11 +53,7 @@
                 {% for bot in bots %}
                     <div class="card p-6">
                         <h4 class="text-xl font-semibold text-gray-800 mb-2">{{ bot.username }}</h4>
-                        <p class="text-gray-600 mb-4">Added: {{ bot.id }}</p>
-                        <div class="flex space-x-4">
-                            <a href="{{ url_for('scans.scan', bot_id=bot.id) }}" class="btn bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700">Scan Followers</a>
-                            <a href="{{ url_for('scans.scan_history', bot_id=bot.id) }}" class="btn bg-blue-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600">View Scan History</a>
-                        </div>
+                        <p class="text-gray-600 mb-4">Bot ID: {{ bot.id }}</p>
                     </div>
                 {% endfor %}
             </div>

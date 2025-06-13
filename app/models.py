@@ -1,6 +1,7 @@
 from . import db
 from flask_login import UserMixin
 from datetime import datetime
+from werkzeug.security import check_password_hash
 
 class User(UserMixin, db.Model):
     __tablename__ = "users"
@@ -13,6 +14,9 @@ class User(UserMixin, db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     bots = db.relationship("InstaBot", backref="owner", lazy=True)
     scans = db.relationship("Scan", backref="user", lazy=True)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
 class InstaBot(db.Model):
     __tablename__ = "insta_bots"

@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 {% block title %}Login{% endblock %}
 {% block content %}
-    <div class="flex items-center justify-center h-full py-12">
-        <div class="card p-8 w-full max-w-md">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Login</h2>
+    <div class="py-6">
+        <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Login</h2>
+        <div class="card p-6 max-w-md mx-auto">
             <form method="POST" action="{{ url_for('auth.login') }}">
                 <div class="mb-4">
                     <label for="username" class="block text-gray-700 font-medium mb-2">Username</label>
                     <input type="text" id="username" name="username" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                 </div>
-                <div class="mb-6">
+                <div class="mb-4">
                     <label for="password" class="block text-gray-700 font-medium mb-2">Password</label>
                     <input type="password" id="password" name="password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                 </div>
-                <button type="submit" class="btn w-full bg-indigo-600 text-white p-3 rounded-lg font-semibold hover:bg-indigo-700">Login</button>
+                <button type="submit" class="btn bg-indigo-600 text-white p-3 rounded-lg font-semibold hover:bg-indigo-700 w-full">Login</button>
             </form>
         </div>
     </div>
