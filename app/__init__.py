@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 import logging
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
 db = SQLAlchemy()
@@ -14,7 +15,9 @@ logging.basicConfig(level=logging.ERROR)
 
 def create_app():
     app = Flask(__name__)
-    load_dotenv()
+    
+    env_path = Path(__file__).parent.parent / '.env'  # adjust path relative to this file
+    load_dotenv(dotenv_path=env_path)
 
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev_secret')
     app.config['SQLALCHEMY_DATABASE_URI'] = (

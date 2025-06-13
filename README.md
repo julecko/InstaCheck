@@ -60,7 +60,7 @@ Edit `.env` with your settings
 ### 5. Run database
 
 ```bash
-  sudo docker-compose up
+sudo docker-compose up
 ```
 
 ### 6. Modify database
