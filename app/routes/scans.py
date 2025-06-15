@@ -39,7 +39,7 @@ def scan():
         debug_info.append(f"Failed to retrieve followers: {str(e)}")
         logger.error(f"Failed to retrieve followers for {current_user.insta_username}: {str(e)}")
         flash(f"Failed to scan followers: {str(e)}", "error")
-        return redirect(url_for("dashboard.redirect"))
+        return redirect(url_for("dashboard.dashboard"))
 
     last_scan = Scan.query.filter_by(user_id=current_user.id).order_by(Scan.scan_time.desc()).first()
     followers_before = []
